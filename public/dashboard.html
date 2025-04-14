@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hydroponic Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #eef2f3;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .readings {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+    }
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    .button {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 Hydroponic Dashboard</h1>
+  <div class="readings">🌡 Temp: <span id="temp">--</span> °C</div>
+  <div class="readings">💧 Humidity: <span id="hum">--</span> %</div>
+
+  <div class="button-group">
+    <button class="button" onclick="sendCommand('pump_on')">Pump ON</button>
+    <button class="button" onclick="sendCommand('pump_off')">Pump OFF</button>
+    <button class="button" onclick="sendCommand('light_on')">Light ON</button>
+    <button class="button" onclick="sendCommand('light_off')">Light OFF</button>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        document.getElementById('temp').innerText = data.temperature ?? '--';
+        document.getElementById('hum').innerText = data.humidity ?? '--';
+      } catch (e) {
+        document.getElementById('temp').innerText = '--';
+        document.getElementById('hum').innerText = '--';
+      }
+    }
+
+    async function sendCommand(cmd) {
+      console.log("Sending command:", cmd);
+      try {
+        const res = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd })
+        });
+        const text = await res.text();
+        console.log("Server response:", text);
+      } catch (err) {
+        console.error("Command failed:", err);
+      }
+    }
+
+    setInterval(fetchData, 5000);
+    fetchData();
+  </script>
+</body>
+</html>
