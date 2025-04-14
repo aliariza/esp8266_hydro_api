@@ -120,9 +120,29 @@ function updateLightButtonLabel() {
         console.error("Command failed:", err);
       }
     }
+    async function fetchStateData() {
+  try {
+    const res = await fetch('/api/data');
+    const data = await res.json();
+
+    document.getElementById('temp').innerText = data.temperature ?? '--';
+    document.getElementById('hum').innerText = data.humidity ?? '--';
+
+    // OPTIONAL state sync from ESP
+    pumpIsOn = data.pump ?? false;
+    lightIsOn = data.light ?? false;
+    updatePumpButtonLabel();
+    updateLightButtonLabel();
+  } catch (err) {
+    console.error("Failed to fetch sensor data:", err);
+    document.getElementById('temp').innerText = '--';
+    document.getElementById('hum').innerText = '--';
+  }
+}
 
     setInterval(fetchData, 5000);
     fetchData();
+    fetchStateData();
   </script>
 </body>
 </html>
