@@ -47,11 +47,34 @@
   <div class="button-group">
     <button class="button" onclick="sendCommand('pump_on')">Pump ON</button>
     <button class="button" onclick="sendCommand('pump_off')">Pump OFF</button>
-    <button class="button" onclick="sendCommand('light_on')">Light ON</button>
-    <button class="button" onclick="sendCommand('light_off')">Light OFF</button>
+    <button class="button" id="lightBtn" onclick="toggleLight()">Light ON</button>
   </div>
 
   <script>
+    let lightIsOn = false;
+
+function toggleLight() {
+  const command = lightIsOn ? "light_off" : "light_on";
+
+  console.log("Sending command:", command);
+  fetch('/api/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command })
+  })
+  .then(res => res.text())
+  .then(text => {
+    console.log("Server response:", text);
+    lightIsOn = !lightIsOn;
+    updateLightButtonLabel();
+  });
+}
+
+function updateLightButtonLabel() {
+  const btn = document.getElementById("lightBtn");
+  btn.innerText = lightIsOn ? "Light OFF" : "Light ON";
+}
+
     async function fetchData() {
       try {
         const res = await fetch('/api/data');
