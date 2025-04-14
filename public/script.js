@@ -1,6 +1,73 @@
 let pumpIsOn = false;
 let lightIsOn = false;
 
+let tempChart, humChart;
+
+const tempData = {
+  labels: [],
+  datasets: [
+    {
+      label: "Temperature (°C)",
+      data: [],
+      borderColor: "red",
+      fill: false,
+    },
+  ],
+};
+
+const humData = {
+  labels: [],
+  datasets: [
+    {
+      label: "Humidity (%)",
+      data: [],
+      borderColor: "blue",
+      fill: false,
+    },
+  ],
+};
+
+window.addEventListener("load", () => {
+  const ctxT = document.getElementById("tempChart").getContext("2d");
+  const ctxH = document.getElementById("humChart").getContext("2d");
+
+  tempChart = new Chart(ctxT, {
+    type: "line",
+    data: tempData,
+    options: {
+      responsive: true,
+      animation: { duration: 300 },
+      scales: {
+        x: { title: { display: true, text: "Time" } },
+        y: { beginAtZero: true },
+      },
+      elements: {
+        point: {
+          radius: 2,
+        },
+      },
+    },
+  });
+
+  humChart = new Chart(ctxH, {
+    type: "line",
+    data: humData,
+    options: {
+      responsive: true,
+      animation: { duration: 300 },
+      scales: {
+        x: { title: { display: true, text: "Time" } },
+        y: { beginAtZero: true },
+      },
+      elements: {
+        point: {
+          radius: 2,
+        },
+      },
+    },
+  });
+});
+
 async function togglePump() {
   const command = pumpIsOn ? "pump_off" : "pump_on";
   console.log("Sending command:", command);
@@ -54,8 +121,28 @@ async function fetchSensorAndStateData() {
 
     document.getElementById("temp").innerText = data.temperature ?? "--";
     document.getElementById("hum").innerText = data.humidity ?? "--";
+    const time = new Date().toLocaleTimeString();
 
-    // Sync ESP-reported relay states if present
+    if (!isNaN(data.temperature)) {
+      tempData.labels.push(time);
+      tempData.datasets[0].data.push(data.temperature);
+      if (tempData.labels.length > 20) {
+        tempData.labels.shift();
+        tempData.datasets[0].data.shift();
+      }
+      tempChart.update();
+    }
+
+    if (!isNaN(data.humidity)) {
+      humData.labels.push(time);
+      humData.datasets[0].data.push(data.humidity);
+      if (humData.labels.length > 20) {
+        humData.labels.shift();
+        humData.datasets[0].data.shift();
+      }
+      humChart.update();
+    }
+
     pumpIsOn = data.pump ?? pumpIsOn;
     lightIsOn = data.light ?? lightIsOn;
     updatePumpButtonLabel();
@@ -68,4 +155,4 @@ async function fetchSensorAndStateData() {
 }
 
 setInterval(fetchSensorAndStateData, 5000);
-fetchSensorAndStateData(); // initial fetch on load
+fetchSensorAndStateData();

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hydroponic Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <h1>🌿 Hydroponic Dashboard</h1>
@@ -16,6 +17,8 @@
     <button class="button" id="lightBtn" onclick="toggleLight()">Light ON</button>
   </div>
 
+  <canvas id="tempChart" width="400" height="200"></canvas>
+  <canvas id="humChart" width="400" height="200"></canvas>
 
   <script src="script.js"></script>
 </body>
